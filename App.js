@@ -14,12 +14,12 @@ export default function App() {
         <Stack.Screen
           name="Seasons"
           component={SeasonsScreen}
-          options={{ title: "Temporadas" }}
+          options={{ headerShown: false }} // 👈 OCULTO
         />
         <Stack.Screen
           name="Episodes"
           component={EpisodesScreen}
-          options={{ title: "Capítulos" }}
+          options={{ headerShown: false }} // 👈 OCULTO
         />
       </Stack.Navigator>
     </NavigationContainer>
