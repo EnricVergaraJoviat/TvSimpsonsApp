@@ -1,28 +1,57 @@
-import React from "react";
+import React, { useMemo, useRef } from "react";
 import {
   View,
   Text,
-  FlatList,
   Pressable,
   Image,
   ImageBackground,
   Dimensions,
   StatusBar,
+  Animated,
 } from "react-native";
 
 import data from "../data/simpsons";
 import { resolveAsset } from "../assets/imagesMap";
 
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
+
 const NUM_COLUMNS = 2;
 const GAP = 14;
 const H_PADDING = 16;
 
+// Header “10% -> 5%” (aprox)
+const MAX_HEADER_H = SCREEN_H * 0.2;
+const MIN_HEADER_H = SCREEN_H * 0.1;
+
+// Cuánto scroll hace falta para completar la animación
+const COLLAPSE_DISTANCE = 180;
+
 export default function SeasonsScreen({ navigation }) {
   const seasons = data.seasons;
 
-  const screenWidth = Dimensions.get("window").width;
-  const itemWidth =
-    (screenWidth - H_PADDING * 2 - GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
+  const itemWidth = useMemo(() => {
+    return (SCREEN_W - H_PADDING * 2 - GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
+  }, []);
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, COLLAPSE_DISTANCE],
+    outputRange: [MAX_HEADER_H, MIN_HEADER_H],
+    extrapolate: "clamp",
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, COLLAPSE_DISTANCE * 0.8, COLLAPSE_DISTANCE],
+    outputRange: [1, 0.75, 0.4],
+    extrapolate: "clamp",
+  });
+
+  const logoScale = scrollY.interpolate({
+    inputRange: [0, COLLAPSE_DISTANCE],
+    outputRange: [1, 0.85],
+    extrapolate: "clamp",
+  });
 
   const renderItem = ({ item }) => {
     const imgSrc = resolveAsset(item.image);
@@ -39,7 +68,7 @@ export default function SeasonsScreen({ navigation }) {
           backgroundColor: "rgba(0,0,0,0.55)",
         })}
       >
-        {/* Imagen */}
+        {/* Imagen temporada */}
         <View
           style={{
             width: "100%",
@@ -51,11 +80,7 @@ export default function SeasonsScreen({ navigation }) {
           {imgSrc ? (
             <Image
               source={imgSrc}
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: 14, // 👈 rounded en la imagen
-              }}
+              style={{ width: "100%", height: "100%", borderRadius: 14 }}
               resizeMode="contain"
             />
           ) : (
@@ -76,23 +101,12 @@ export default function SeasonsScreen({ navigation }) {
         {/* Texto */}
         <View style={{ padding: 12 }}>
           <Text
-            style={{
-              color: "#fff",
-              fontSize: 16,
-              fontWeight: "700",
-            }}
+            style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}
             numberOfLines={1}
           >
             {item.title}
           </Text>
-
-          <Text
-            style={{
-              color: "#e0e0e0",
-              marginTop: 4,
-              fontSize: 12,
-            }}
-          >
+          <Text style={{ color: "#e0e0e0", marginTop: 4, fontSize: 12 }}>
             {item.episodes.length} capítulos
           </Text>
         </View>
@@ -108,31 +122,31 @@ export default function SeasonsScreen({ navigation }) {
     >
       <StatusBar barStyle="light-content" />
 
-      {/* Overlay oscuro para contraste */}
+      {/* Overlay para contraste */}
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)" }}>
-        {/* Header */}
-        <View
+        {/* Header animado */}
+        <Animated.View
           style={{
-            paddingHorizontal: H_PADDING,
-            paddingTop: 20,
-            paddingBottom: 12,
+            height: headerHeight,
+            opacity: headerOpacity,
+            alignItems: "center",
+            justifyContent: "center",
+            paddingTop: 10,
           }}
         >
-          <Text
+          <Animated.Image
+            source={require("../../assets/logos/logo_simpsons.png")}
+            resizeMode="contain"
             style={{
-              color: "#fff",
-              fontSize: 28,
-              fontWeight: "800",
+              width: "82%",
+              height: "80%",
+              transform: [{ scale: logoScale }],
             }}
-          >
-            Los Simpson
-          </Text>
-          <Text style={{ color: "#f1f1f1", marginTop: 6 }}>
-            Temporadas
-          </Text>
-        </View>
+          />
+        </Animated.View>
 
-        <FlatList
+        {/* Lista animada (para capturar el scrollY) */}
+        <Animated.FlatList
           contentContainerStyle={{
             paddingHorizontal: H_PADDING,
             paddingBottom: 24,
@@ -143,6 +157,11 @@ export default function SeasonsScreen({ navigation }) {
           columnWrapperStyle={{ gap: GAP, marginBottom: GAP }}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false } // height no puede con native driver
+          )}
         />
       </View>
     </ImageBackground>
