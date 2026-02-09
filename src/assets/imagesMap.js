@@ -659,6 +659,7 @@ export const imagesMap = {
   "5x12.jpg": require("../../assets/carousel/5x12.jpg"),
   "5x13.jpg": require("../../assets/carousel/5x13.jpg"),
   "5x14.jpg": require("../../assets/carousel/5x14.jpg"),
+  "5x15.jpg": require("../../assets/carousel/5x15.jpg"),
   "5x16.jpg": require("../../assets/carousel/5x16.jpg"),
   "5x17.jpg": require("../../assets/carousel/5x17.jpg"),
   "5x18.jpg": require("../../assets/carousel/5x18.jpg"),
