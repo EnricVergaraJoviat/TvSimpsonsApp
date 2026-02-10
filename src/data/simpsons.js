@@ -7,6 +7,7 @@ const data = {
       "id": 1,
       "title": "Temporada 1",
       "image": "Season_1_Icon.jpg",
+      "avgColor": "#748492",
       "episodes": [
         {
           "id": "1x01",
@@ -131,6 +132,7 @@ const data = {
       "id": 2,
       "title": "Temporada 2",
       "image": "Season_2_Icon.jpg",
+      "avgColor": "#937FAD",
       "episodes": [
         {
           "id": "2x01",
@@ -336,6 +338,7 @@ const data = {
       "id": 3,
       "title": "Temporada 3",
       "image": "Season_3_Icon.jpg",
+      "avgColor": "#939F66",
       "episodes": [
         {
           "id": "3x01",
@@ -550,6 +553,7 @@ const data = {
       "id": 4,
       "title": "Temporada 4",
       "image": "Season_4_Icon.jpg",
+      "avgColor": "#4E816E",
       "episodes": [
         {
           "id": "4x01",
@@ -755,6 +759,7 @@ const data = {
       "id": 5,
       "title": "Temporada 5",
       "image": "Season_5_Icon.jpg",
+      "avgColor": "#9D883D",
       "episodes": [
         {
           "id": "5x01",
@@ -960,6 +965,7 @@ const data = {
       "id": 6,
       "title": "Temporada 6",
       "image": "Season_6_Icon.jpg",
+      "avgColor": "#59AF9A",
       "episodes": [
         {
           "id": "6x01",
@@ -1192,6 +1198,7 @@ const data = {
       "id": 7,
       "title": "Temporada 7",
       "image": "Season_7_Icon.jpg",
+      "avgColor": "#B36D9D",
       "episodes": [
         {
           "id": "7x01",
@@ -1424,6 +1431,7 @@ const data = {
       "id": 8,
       "title": "Temporada 8",
       "image": "Season_8_Icon.jpg",
+      "avgColor": "#C47463",
       "episodes": [
         {
           "id": "8x01",
@@ -1656,6 +1664,7 @@ const data = {
       "id": 9,
       "title": "Temporada 9",
       "image": "Season_9_Icon.jpg",
+      "avgColor": "#8C5870",
       "episodes": [
         {
           "id": "9x01",
@@ -1888,6 +1897,7 @@ const data = {
       "id": 10,
       "title": "Temporada 10",
       "image": "Season_10_Icon.jpg",
+      "avgColor": "#7CADA0",
       "episodes": [
         {
           "id": "10x01",
@@ -2102,6 +2112,7 @@ const data = {
       "id": 11,
       "title": "Temporada 11",
       "image": "Season_11_Icon.jpg",
+      "avgColor": "#5E8594",
       "episodes": [
         {
           "id": "11x01",
@@ -2307,6 +2318,7 @@ const data = {
       "id": 12,
       "title": "Temporada 12",
       "image": "Season_12_Icon.jpg",
+      "avgColor": "#AB744F",
       "episodes": [
         {
           "id": "12x01",
@@ -2503,6 +2515,7 @@ const data = {
       "id": 13,
       "title": "Temporada 13",
       "image": "Season_13_Icon.jpg",
+      "avgColor": "#95828F",
       "episodes": [
         {
           "id": "13x01",
@@ -2708,6 +2721,7 @@ const data = {
       "id": 14,
       "title": "Temporada 14",
       "image": "Season_14_Icon.jpg",
+      "avgColor": "#727F5D",
       "episodes": [
         {
           "id": "14x01",
@@ -2913,6 +2927,7 @@ const data = {
       "id": 15,
       "title": "Temporada 15",
       "image": "Season_15_Icon.jpg",
+      "avgColor": "#989948",
       "episodes": [
         {
           "id": "15x01",
@@ -3118,6 +3133,7 @@ const data = {
       "id": 16,
       "title": "Temporada 16",
       "image": "Season_16_Icon.jpg",
+      "avgColor": "#C87A8B",
       "episodes": [
         {
           "id": "16x01",
@@ -3314,6 +3330,7 @@ const data = {
       "id": 17,
       "title": "Temporada 17",
       "image": "Season_17_Icon.jpg",
+      "avgColor": "#8A7B8A",
       "episodes": [
         {
           "id": "17x01",
@@ -3519,6 +3536,7 @@ const data = {
       "id": 18,
       "title": "Temporada 18",
       "image": "Season_18_Icon.jpg",
+      "avgColor": "#94573E",
       "episodes": [
         {
           "id": "18x01",
@@ -3724,6 +3742,7 @@ const data = {
       "id": 19,
       "title": "Temporada 19",
       "image": "Season_19_Icon.jpg",
+      "avgColor": "#79BB8C",
       "episodes": [
         {
           "id": "19x01",
@@ -3911,6 +3930,7 @@ const data = {
       "id": 20,
       "title": "Temporada 20",
       "image": "Season_20_Icon.jpg",
+      "avgColor": "#B5863A",
       "episodes": [
         {
           "id": "20x01",
@@ -4107,6 +4127,7 @@ const data = {
       "id": 21,
       "title": "Temporada 21",
       "image": "Season_21_Icon.jpg",
+      "avgColor": "#A16667",
       "episodes": [
         {
           "id": "21x01",
@@ -4321,6 +4342,7 @@ const data = {
       "id": 22,
       "title": "Temporada 22",
       "image": "Season_22_Icon.jpg",
+      "avgColor": "#B5618B",
       "episodes": [
         {
           "id": "22x01",
@@ -4526,6 +4548,7 @@ const data = {
       "id": 23,
       "title": "Temporada 23",
       "image": "Season_23_Icon.jpg",
+      "avgColor": "#587C7E",
       "episodes": [
         {
           "id": "23x01",
@@ -4731,6 +4754,7 @@ const data = {
       "id": 24,
       "title": "Temporada 24",
       "image": "Season_24_Icon.jpg",
+      "avgColor": "#85A874",
       "episodes": [
         {
           "id": "24x01",
@@ -4936,6 +4960,7 @@ const data = {
       "id": 25,
       "title": "Temporada 25",
       "image": "Season_25_Icon.jpg",
+      "avgColor": "#A5842C",
       "episodes": [
         {
           "id": "25x01",
@@ -5141,6 +5166,7 @@ const data = {
       "id": 26,
       "title": "Temporada 26",
       "image": "Season_26_Icon.jpg",
+      "avgColor": "#798E74",
       "episodes": [
         {
           "id": "26x01",
@@ -5346,6 +5372,7 @@ const data = {
       "id": 27,
       "title": "Temporada 27",
       "image": "Season_27_Icon.jpg",
+      "avgColor": "#9E6886",
       "episodes": [
         {
           "id": "27x01",
@@ -5551,6 +5578,7 @@ const data = {
       "id": 28,
       "title": "Temporada 28",
       "image": "Season_28_Icon.jpg",
+      "avgColor": "#7B5948",
       "episodes": [
         {
           "id": "28x01",
@@ -5747,6 +5775,7 @@ const data = {
       "id": 29,
       "title": "Temporada 29",
       "image": "Season_29_Icon.jpg",
+      "avgColor": "#5D737E",
       "episodes": [
         {
           "id": "29x01",
@@ -5942,6 +5971,7 @@ const data = {
       "id": 30,
       "title": "Temporada 30",
       "image": "Season_30_icon.jpg",
+      "avgColor": "#A9636D",
       "episodes": [
         {
           "id": "30x01",
@@ -6156,6 +6186,7 @@ const data = {
       "id": 31,
       "title": "Temporada 31",
       "image": "Season_31_Icon.jpg",
+      "avgColor": "#805C72",
       "episodes": [
         {
           "id": "31x01",
@@ -6361,6 +6392,7 @@ const data = {
       "id": 32,
       "title": "Temporada 32",
       "image": "Season_32_Icon.jpg",
+      "avgColor": "#577266",
       "episodes": [
         {
           "id": "32x01",
@@ -6566,6 +6598,7 @@ const data = {
       "id": 33,
       "title": "Temporada 33",
       "image": "Season_33_Icon.jpg",
+      "avgColor": "#7A93A7",
       "episodes": [
         {
           "id": "33x01",
@@ -6762,6 +6795,7 @@ const data = {
       "id": 34,
       "title": "Temporada 34",
       "image": "Season_34_Icon.jpg",
+      "avgColor": "#744A4E",
       "episodes": [
         {
           "id": "34x01",
@@ -6967,6 +7001,7 @@ const data = {
       "id": 35,
       "title": "Temporada 35",
       "image": "Season_35_Icon.jpg",
+      "avgColor": "#94A47E",
       "episodes": [
         {
           "id": "35x01",
