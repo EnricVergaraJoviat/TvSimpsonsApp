@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useLayoutEffect } from "react";
+import React, { useMemo, useRef, useLayoutEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Animated,
   Platform,
   Dimensions,
+  Alert,
 } from "react-native";
 
 import data from "../data/simpsons";
@@ -18,6 +19,21 @@ const { height: SCREEN_H } = Dimensions.get("window");
 const MAX_HEADER_H = SCREEN_H * 0.52;
 const MIN_HEADER_H = SCREEN_H * 0.15;
 const GAP_BELOW_HEADER = 12;
+
+// 👉 CAMBIA ESTO por la IP de tu Raspberry
+const API_BASE_URL = "http://192.168.1.23:5050";
+
+// Convierte el ID del JSON (ej: "7x01") a lo que espera la Raspberry (ej: "S07E01")
+function toRaspberryEpisodeId(appEpisodeId) {
+  // appEpisodeId típicamente: "7x01", "34x14", etc.
+  const m = String(appEpisodeId).match(/^(\d+)\s*x\s*(\d+)$/i);
+  if (!m) return null;
+
+  const seasonNum = String(parseInt(m[1], 10)).padStart(2, "0");
+  const episodeNum = String(parseInt(m[2], 10)).padStart(2, "0");
+
+  return `S${seasonNum}E${episodeNum}`;
+}
 
 export default function EpisodesScreen({ route, navigation }) {
   const { seasonId } = route.params;
@@ -33,6 +49,55 @@ export default function EpisodesScreen({ route, navigation }) {
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
+  const playEpisodeOnPi = useCallback(async (raspberryEpisodeId) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/play`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: raspberryEpisodeId }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status} ${txt}`);
+      }
+
+      // Si quieres, puedes leer JSON:
+      // const json = await res.json();
+      // console.log(json);
+    } catch (err) {
+      Alert.alert(
+        "No se pudo reproducir",
+        `Error llamando a ${API_BASE_URL}/play\n\n${String(err)}`
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
+  }, []);
+
+  const onPressPlay = useCallback(
+    async (item) => {
+      const raspberryId = toRaspberryEpisodeId(item.id);
+      if (!raspberryId) {
+        Alert.alert(
+          "ID inválido",
+          `No puedo convertir el id "${item.id}" al formato SxxExx.`
+        );
+        return;
+      }
+
+      // Debug útil:
+      // console.log("APP id:", item.id, "-> PI id:", raspberryId);
+
+      await playEpisodeOnPi(raspberryId);
+    },
+    [playEpisodeOnPi]
+  );
+
   if (!season) {
     return (
       <View style={{ flex: 1, padding: 16, justifyContent: "center" }}>
@@ -42,7 +107,6 @@ export default function EpisodesScreen({ route, navigation }) {
   }
 
   const bgColor = season.avgColor || "#111";
-
   const maxTranslate = MAX_HEADER_H - MIN_HEADER_H;
 
   const headerTranslateY = scrollY.interpolate({
@@ -60,7 +124,9 @@ export default function EpisodesScreen({ route, navigation }) {
         <Animated.FlatList
           data={season.episodes}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <EpisodeRow item={item} />}
+          renderItem={({ item }) => (
+            <EpisodeRow item={item} onPlay={() => onPressPlay(item)} />
+          )}
           ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
           showsVerticalScrollIndicator={false}
           scrollEventThrottle={16}
