@@ -9,6 +9,7 @@ import {
   StatusBar,
   Animated,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import rawData from "../data/simpsons";
 import { localizeSimpsonsData } from "../data/localizeSimpsonsData";
@@ -30,6 +31,7 @@ const MIN_HEADER_H = SCREEN_H * 0.1;
 const COLLAPSE_DISTANCE = 180;
 
 export default function SeasonsScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const language = getDeviceLanguage();
   const strings = getStrings(language);
   const localizedData = useMemo(
@@ -144,7 +146,7 @@ export default function SeasonsScreen({ navigation }) {
             opacity: headerOpacity,
             alignItems: "center",
             justifyContent: "center",
-            paddingTop: 10,
+            paddingTop: insets.top + 6,
           }}
         >
           <Animated.Image

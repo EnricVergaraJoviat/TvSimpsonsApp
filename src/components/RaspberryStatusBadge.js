@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View, Text, Pressable, Modal, Animated, Alert } from "react-native";
 import { stopRaspberryPlayback } from "../services/raspberryApi";
 import { useRaspberryStatus } from "../context/RaspberryStatusContext";
@@ -11,6 +12,7 @@ function statusColor(status) {
 
 export default function RaspberryStatusBadge({ strings, style }) {
   const { health, refreshHealth } = useRaspberryStatus();
+  const insets = useSafeAreaInsets();
   const [visible, setVisible] = useState(false);
   const [stopping, setStopping] = useState(false);
   const anim = useRef(new Animated.Value(0)).current;
@@ -74,7 +76,7 @@ export default function RaspberryStatusBadge({ strings, style }) {
         style={[
           {
             position: "absolute",
-            top: 14,
+            top: insets.top + 0,
             right: 16,
             zIndex: 30,
             flexDirection: "row",
