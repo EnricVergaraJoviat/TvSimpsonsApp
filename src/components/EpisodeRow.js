@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Image, Pressable } from "react-native";
 import { resolveAsset } from "../assets/imagesMap";
 
-export default function EpisodeRow({ item, onOpenDetails }) {
+export default function EpisodeRow({ item, onOpenDetails, strings }) {
   const imgSrc = resolveAsset(item.image);
 
   return (
@@ -33,7 +33,9 @@ export default function EpisodeRow({ item, onOpenDetails }) {
             backgroundColor: "#222",
           }}
         >
-          <Text style={{ color: "#bbb", fontSize: 12 }}>No img</Text>
+          <Text style={{ color: "#bbb", fontSize: 12 }}>
+            {strings?.noImage || "No img"}
+          </Text>
         </View>
       )}
 
@@ -46,7 +48,7 @@ export default function EpisodeRow({ item, onOpenDetails }) {
       <Pressable
         onPress={onOpenDetails}
         accessibilityRole="button"
-        accessibilityLabel={`Ver detalles de ${item.title}`}
+        accessibilityLabel={`${strings?.viewDetails || "View details for"} ${item.title}`}
         style={({ pressed }) => ({
           width: 44,
           height: 44,

@@ -15,10 +15,13 @@ import {
   Alert,
 } from "react-native";
 
-import data from "../data/simpsons";
+import rawData from "../data/simpsons";
+import { localizeSimpsonsData } from "../data/localizeSimpsonsData";
 import EpisodeRow from "../components/EpisodeRow";
 import SeasonHeader from "../components/SeasonHeader";
 import EpisodeDetailsModal from "../components/EpisodeDetailsModal";
+import { getDeviceLanguage, getStrings } from "../i18n";
+import { RASPBERRY_API_BASE_URL } from "../services/raspberryApi";
 
 const { height: SCREEN_H } = Dimensions.get("window");
 
@@ -26,9 +29,6 @@ const { height: SCREEN_H } = Dimensions.get("window");
 const MAX_HEADER_H = SCREEN_H * 0.52;
 const MIN_HEADER_H = SCREEN_H * 0.15;
 const GAP_BELOW_HEADER = 12;
-
-// 👉 CAMBIA ESTO por la IP de tu Raspberry
-const API_BASE_URL = "http://192.168.1.23:5050";
 
 // Convierte el ID del JSON (ej: "7x01") a lo que espera la Raspberry (ej: "S07E01")
 function toRaspberryEpisodeId(appEpisodeId) {
@@ -46,14 +46,20 @@ export default function EpisodesScreen({ route, navigation }) {
   const { seasonId } = route.params;
   const [selectedEpisode, setSelectedEpisode] = useState(null);
   const [isDetailsVisible, setIsDetailsVisible] = useState(false);
+  const language = getDeviceLanguage();
+  const strings = getStrings(language);
+  const localizedData = useMemo(
+    () => localizeSimpsonsData(rawData, language),
+    [language]
+  );
 
   useLayoutEffect(() => {
     navigation?.setOptions?.({ headerShown: false });
   }, [navigation]);
 
   const season = useMemo(
-    () => data.seasons.find((s) => s.id === seasonId),
-    [seasonId]
+    () => localizedData.seasons.find((s) => s.id === seasonId),
+    [localizedData, seasonId]
   );
 
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -93,7 +99,7 @@ export default function EpisodesScreen({ route, navigation }) {
     const timeout = setTimeout(() => controller.abort(), 5000);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/play`, {
+      const res = await fetch(`${RASPBERRY_API_BASE_URL}/play`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: raspberryEpisodeId }),
@@ -110,20 +116,20 @@ export default function EpisodesScreen({ route, navigation }) {
       // console.log(json);
     } catch (err) {
       Alert.alert(
-        "No se pudo reproducir",
-        `Error llamando a ${API_BASE_URL}/play\n\n${String(err)}`
+        strings.couldNotPlay,
+        `Error llamando a ${RASPBERRY_API_BASE_URL}/play\n\n${String(err)}`
       );
     } finally {
       clearTimeout(timeout);
     }
-  }, []);
+  }, [strings.couldNotPlay]);
 
   const onPressPlay = useCallback(
     async (item) => {
       const raspberryId = toRaspberryEpisodeId(item.id);
       if (!raspberryId) {
         Alert.alert(
-          "ID inválido",
+          strings.invalidId,
           `No puedo convertir el id "${item.id}" al formato SxxExx.`
         );
         return;
@@ -134,7 +140,7 @@ export default function EpisodesScreen({ route, navigation }) {
 
       await playEpisodeOnPi(raspberryId);
     },
-    [playEpisodeOnPi]
+    [playEpisodeOnPi, strings.invalidId]
   );
 
   const detailsCardTranslateY = detailsAnim.interpolate({
@@ -155,7 +161,7 @@ export default function EpisodesScreen({ route, navigation }) {
   if (!season) {
     return (
       <View style={{ flex: 1, padding: 16, justifyContent: "center" }}>
-        <Text>No se encontró la temporada.</Text>
+        <Text>{strings.notFoundSeason}</Text>
       </View>
     );
   }
@@ -179,7 +185,11 @@ export default function EpisodesScreen({ route, navigation }) {
           data={season.episodes}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <EpisodeRow item={item} onOpenDetails={() => openEpisodeDetails(item)} />
+            <EpisodeRow
+              item={item}
+              onOpenDetails={() => openEpisodeDetails(item)}
+              strings={strings}
+            />
           )}
           ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
           showsVerticalScrollIndicator={false}
@@ -200,6 +210,7 @@ export default function EpisodesScreen({ route, navigation }) {
           season={season}
           maxHeaderH={MAX_HEADER_H}
           translateY={headerTranslateY}
+          strings={strings}
         />
 
         {/* “Safe area” mínimo arriba para iOS notch (sin libs) */}
@@ -219,6 +230,7 @@ export default function EpisodesScreen({ route, navigation }) {
         visible={isDetailsVisible}
         episode={selectedEpisode}
         seasonTitle={season?.title}
+        strings={strings}
         onClose={closeEpisodeDetails}
         onPlay={onPressPlay}
         cardOpacity={detailsCardOpacity}

@@ -6,6 +6,7 @@ export default function SeasonHeader({
   season,
   maxHeaderH,
   translateY,
+  strings,
 }) {
   const seasonImgSrc = resolveAsset(season?.image);
 
@@ -39,7 +40,9 @@ export default function SeasonHeader({
               alignItems: "center",
             }}
           >
-            <Text style={{ color: "#fff" }}>{season?.title || "Temporada"}</Text>
+            <Text style={{ color: "#fff" }}>
+              {season?.title || strings?.seasonFallback || "Season"}
+            </Text>
           </View>
         )}
       </View>
@@ -58,14 +61,14 @@ export default function SeasonHeader({
             paddingVertical: 10,
             paddingHorizontal: 16,
             borderRadius: 0,
-            backgroundColor: "rgba(255,255,255,0.82)",
+            backgroundColor: "rgba(0,0,0,0.82)",
           }}
         >
-          <Text style={{ color: "#000", fontSize: 26, fontWeight: "900" }}>
+          <Text style={{ color: "#fff", fontSize: 26, fontWeight: "900" }}>
             {season?.title}
           </Text>
-          <Text style={{ color: "rgba(0,0,0,0.8)", marginTop: 2, fontSize: 13 }}>
-            {season?.episodes?.length ?? 0} capítulos
+          <Text style={{ color: "rgba(255,255,255,0.9)", marginTop: 2, fontSize: 13 }}>
+            {season?.episodes?.length ?? 0} {strings?.episodes || "episodes"}
           </Text>
         </View>
       </View>

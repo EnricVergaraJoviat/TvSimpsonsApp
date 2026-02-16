@@ -6,6 +6,7 @@ export default function EpisodeDetailsModal({
   visible,
   episode,
   seasonTitle,
+  strings,
   onClose,
   onPlay,
   cardOpacity,
@@ -56,7 +57,7 @@ export default function EpisodeDetailsModal({
             }}
           >
             <Text style={{ color: "#111", fontSize: 24, fontWeight: "900" }}>
-              {seasonTitle || "Temporada"}
+              {seasonTitle || strings?.seasonFallback || "Season"}
             </Text>
             <Pressable
               onPress={onClose}
@@ -109,10 +110,10 @@ export default function EpisodeDetailsModal({
                 </Text>
 
                 <Text style={{ color: "#222", fontSize: 15, marginTop: 10 }}>
-                  Duración: {episode.duration}
+                  {strings?.duration || "Duration"}: {episode.duration}
                 </Text>
                 <Text style={{ color: "#222", fontSize: 15, marginTop: 2 }}>
-                  Emisión: {episode.airDate}
+                  {strings?.airDate || "Aired"}: {episode.airDate}
                 </Text>
 
                 <Text
@@ -123,7 +124,7 @@ export default function EpisodeDetailsModal({
                     lineHeight: 23,
                   }}
                 >
-                  {episode.synopsis || "Sinopsis no disponible."}
+                  {episode.synopsis || strings?.noSynopsis || "Synopsis not available."}
                 </Text>
               </>
             )}
@@ -143,7 +144,7 @@ export default function EpisodeDetailsModal({
               })}
             >
               <Text style={{ color: "#fff", fontSize: 17, fontWeight: "800" }}>
-                ▶ Reproducir en Raspberry
+                {strings?.playOnRaspberry || "▶ Play on Raspberry"}
               </Text>
             </Pressable>
           </View>
