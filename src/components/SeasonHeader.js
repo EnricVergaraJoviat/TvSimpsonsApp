@@ -48,24 +48,23 @@ export default function SeasonHeader({
       <View
         style={{
           position: "absolute",
-          left: 16,
-          right: 16,
-          bottom: 16,
+          left: 0,
+          right: 0,
+          bottom: 0,
         }}
       >
         <View
           style={{
-            alignSelf: "flex-start",
             paddingVertical: 10,
-            paddingHorizontal: 12,
-            borderRadius: 14,
-            backgroundColor: "rgba(0,0,0,0.45)",
+            paddingHorizontal: 16,
+            borderRadius: 0,
+            backgroundColor: "rgba(255,255,255,0.82)",
           }}
         >
-          <Text style={{ color: "#fff", fontSize: 26, fontWeight: "900" }}>
+          <Text style={{ color: "#000", fontSize: 26, fontWeight: "900" }}>
             {season?.title}
           </Text>
-          <Text style={{ color: "#eaeaea", marginTop: 2, fontSize: 13 }}>
+          <Text style={{ color: "rgba(0,0,0,0.8)", marginTop: 2, fontSize: 13 }}>
             {season?.episodes?.length ?? 0} capítulos
           </Text>
         </View>

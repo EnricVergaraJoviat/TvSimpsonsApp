@@ -1,4 +1,10 @@
-import React, { useMemo, useRef, useLayoutEffect, useCallback } from "react";
+import React, {
+  useMemo,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -12,6 +18,7 @@ import {
 import data from "../data/simpsons";
 import EpisodeRow from "../components/EpisodeRow";
 import SeasonHeader from "../components/SeasonHeader";
+import EpisodeDetailsModal from "../components/EpisodeDetailsModal";
 
 const { height: SCREEN_H } = Dimensions.get("window");
 
@@ -37,6 +44,8 @@ function toRaspberryEpisodeId(appEpisodeId) {
 
 export default function EpisodesScreen({ route, navigation }) {
   const { seasonId } = route.params;
+  const [selectedEpisode, setSelectedEpisode] = useState(null);
+  const [isDetailsVisible, setIsDetailsVisible] = useState(false);
 
   useLayoutEffect(() => {
     navigation?.setOptions?.({ headerShown: false });
@@ -48,6 +57,36 @@ export default function EpisodesScreen({ route, navigation }) {
   );
 
   const scrollY = useRef(new Animated.Value(0)).current;
+  const detailsAnim = useRef(new Animated.Value(0)).current;
+
+  const openEpisodeDetails = useCallback(
+    (episode) => {
+      setSelectedEpisode(episode);
+      setIsDetailsVisible(true);
+      detailsAnim.setValue(0);
+      Animated.parallel([
+        Animated.timing(detailsAnim, {
+          toValue: 1,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    },
+    [detailsAnim]
+  );
+
+  const closeEpisodeDetails = useCallback(() => {
+    Animated.timing(detailsAnim, {
+      toValue: 0,
+      duration: 170,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) {
+        setIsDetailsVisible(false);
+        setSelectedEpisode(null);
+      }
+    });
+  }, [detailsAnim]);
 
   const playEpisodeOnPi = useCallback(async (raspberryEpisodeId) => {
     const controller = new AbortController();
@@ -98,6 +137,21 @@ export default function EpisodesScreen({ route, navigation }) {
     [playEpisodeOnPi]
   );
 
+  const detailsCardTranslateY = detailsAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [40, 0],
+  });
+
+  const detailsCardScale = detailsAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.96, 1],
+  });
+
+  const detailsCardOpacity = detailsAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
   if (!season) {
     return (
       <View style={{ flex: 1, padding: 16, justifyContent: "center" }}>
@@ -125,7 +179,7 @@ export default function EpisodesScreen({ route, navigation }) {
           data={season.episodes}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <EpisodeRow item={item} onPlay={() => onPressPlay(item)} />
+            <EpisodeRow item={item} onOpenDetails={() => openEpisodeDetails(item)} />
           )}
           ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
           showsVerticalScrollIndicator={false}
@@ -160,6 +214,17 @@ export default function EpisodesScreen({ route, navigation }) {
           }}
         />
       </View>
+
+      <EpisodeDetailsModal
+        visible={isDetailsVisible}
+        episode={selectedEpisode}
+        seasonTitle={season?.title}
+        onClose={closeEpisodeDetails}
+        onPlay={onPressPlay}
+        cardOpacity={detailsCardOpacity}
+        cardTranslateY={detailsCardTranslateY}
+        cardScale={detailsCardScale}
+      />
     </View>
   );
 }

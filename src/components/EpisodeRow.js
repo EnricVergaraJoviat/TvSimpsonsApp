@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Image, Pressable } from "react-native";
 import { resolveAsset } from "../assets/imagesMap";
 
-export default function EpisodeRow({ item, onPlay }) {
+export default function EpisodeRow({ item, onOpenDetails }) {
   const imgSrc = resolveAsset(item.image);
 
   return (
@@ -41,15 +41,12 @@ export default function EpisodeRow({ item, onPlay }) {
         <Text style={{ fontSize: 16, color: "#fff", fontWeight: "700" }}>
           {item.episodeNumber}. {item.title}
         </Text>
-
-        <Text style={{ opacity: 0.85, marginTop: 4, color: "#e6e6e6" }}>
-          Duración: {item.duration} · Emisión: {item.airDate}
-        </Text>
       </View>
 
-      {/* BOTÓN PLAY */}
       <Pressable
-        onPress={onPlay}
+        onPress={onOpenDetails}
+        accessibilityRole="button"
+        accessibilityLabel={`Ver detalles de ${item.title}`}
         style={({ pressed }) => ({
           width: 44,
           height: 44,
@@ -61,8 +58,8 @@ export default function EpisodeRow({ item, onPlay }) {
           transform: [{ scale: pressed ? 0.98 : 1 }],
         })}
       >
-        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "800" }}>
-          ▶
+        <Text style={{ color: "#fff", fontSize: 22, fontWeight: "900" }}>
+          ›
         </Text>
       </Pressable>
     </View>
