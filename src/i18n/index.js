@@ -31,31 +31,61 @@ const STRINGS = {
   },
 };
 
-function getNativeLocale() {
+function pushIfString(target, value) {
+  if (typeof value === "string" && value.trim()) target.push(value.trim());
+}
+
+function getNativeLocales() {
   const candidates = [];
 
   try {
     if (Platform.OS === "ios") {
       const settings = NativeModules?.SettingsManager?.settings || {};
-      candidates.push(settings.AppleLocale);
-      candidates.push(settings.AppleLanguages?.[0]);
-      candidates.push(settings.localeIdentifier);
-      candidates.push(settings.locale);
+      pushIfString(candidates, settings.AppleLocale);
+      pushIfString(candidates, settings.localeIdentifier);
+      pushIfString(candidates, settings.locale);
+      if (Array.isArray(settings.AppleLanguages)) {
+        settings.AppleLanguages.forEach((lang) => pushIfString(candidates, lang));
+      }
     }
 
     if (Platform.OS === "android") {
-      candidates.push(NativeModules?.I18nManager?.localeIdentifier);
-      candidates.push(NativeModules?.I18nManager?.locale);
-      candidates.push(NativeModules?.SettingsManager?.settings?.localeIdentifier);
-      candidates.push(NativeModules?.SettingsManager?.settings?.locale);
-      candidates.push(NativeModules?.SettingsManager?.settings?.AppleLocale);
-      candidates.push(NativeModules?.SettingsManager?.settings?.AppleLanguages?.[0]);
+      pushIfString(candidates, NativeModules?.I18nManager?.localeIdentifier);
+      pushIfString(candidates, NativeModules?.I18nManager?.locale);
+      pushIfString(candidates, NativeModules?.SettingsManager?.settings?.localeIdentifier);
+      pushIfString(candidates, NativeModules?.SettingsManager?.settings?.locale);
+      pushIfString(candidates, NativeModules?.SettingsManager?.settings?.AppleLocale);
+      const androidAppleLanguages =
+        NativeModules?.SettingsManager?.settings?.AppleLanguages;
+      if (Array.isArray(androidAppleLanguages)) {
+        androidAppleLanguages.forEach((lang) => pushIfString(candidates, lang));
+      }
     }
   } catch (_err) {
     // Ignora y usa fallback.
   }
 
-  return candidates.find((v) => typeof v === "string" && v.trim().length > 0) || null;
+  return candidates;
+}
+
+function getExpoLocales() {
+  const candidates = [];
+  try {
+    // Optional dependency. Si no está instalada, seguimos con fallback nativo.
+    // eslint-disable-next-line global-require, import/no-extraneous-dependencies
+    const localization = require("expo-localization");
+    const locales = localization?.getLocales?.() || [];
+    locales.forEach((loc) => {
+      pushIfString(candidates, loc?.languageTag);
+      pushIfString(candidates, loc?.languageCode);
+      if (loc?.languageCode && loc?.regionCode) {
+        pushIfString(candidates, `${loc.languageCode}-${loc.regionCode}`);
+      }
+    });
+  } catch (_err) {
+    // expo-localization no disponible.
+  }
+  return candidates;
 }
 
 function pickAppLanguageFromLocale(localeValue) {
@@ -77,18 +107,30 @@ function pickAppLanguageFromLocale(localeValue) {
 }
 
 export function getDeviceLanguage() {
-  const nativeLocale = getNativeLocale();
+  const expoLocales = getExpoLocales();
+  const nativeLocales = getNativeLocales();
   const intlLocale = Intl?.DateTimeFormat?.().resolvedOptions?.().locale || null;
+  const navigatorLocales = Array.isArray(globalThis?.navigator?.languages)
+    ? globalThis.navigator.languages
+    : [];
   const navigatorLocale = globalThis?.navigator?.language || null;
 
-  const byNative = pickAppLanguageFromLocale(nativeLocale);
-  if (byNative) return byNative;
+  const candidates = [
+    ...expoLocales,
+    ...nativeLocales,
+    intlLocale,
+    ...navigatorLocales,
+    navigatorLocale,
+  ].filter(Boolean);
 
-  const byIntl = pickAppLanguageFromLocale(intlLocale);
-  if (byIntl) return byIntl;
+  // Priorizamos ES si aparece en cualquier fuente (evita falsos EN en Expo Go).
+  if (candidates.some((locale) => pickAppLanguageFromLocale(locale) === "es")) {
+    return "es";
+  }
 
-  const byNavigator = pickAppLanguageFromLocale(navigatorLocale);
-  if (byNavigator) return byNavigator;
+  if (candidates.some((locale) => pickAppLanguageFromLocale(locale) === "en")) {
+    return "en";
+  }
 
   // Fallback pragmático: esta app está orientada a ES y solo tiene ES/EN.
   return "es";
@@ -96,4 +138,10 @@ export function getDeviceLanguage() {
 
 export function getStrings(language) {
   return language === "es" ? STRINGS.es : STRINGS.en;
+}
+
+export function formatSeasonTitle(seasonNumber, strings) {
+  const num = Number(seasonNumber);
+  if (!Number.isFinite(num)) return strings?.seasonFallback || "Season";
+  return `${strings?.seasonFallback || "Season"} ${num}`;
 }

@@ -13,7 +13,7 @@ import {
 import rawData from "../data/simpsons";
 import { localizeSimpsonsData } from "../data/localizeSimpsonsData";
 import { resolveAsset } from "../assets/imagesMap";
-import { getDeviceLanguage, getStrings } from "../i18n";
+import { formatSeasonTitle, getDeviceLanguage, getStrings } from "../i18n";
 import { getRaspberryHealthStatus } from "../services/raspberryApi";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
@@ -133,7 +133,7 @@ export default function SeasonsScreen({ navigation }) {
             style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}
             numberOfLines={1}
           >
-            {item.title}
+            {formatSeasonTitle(item.id, strings)}
           </Text>
           <Text style={{ color: "#e0e0e0", marginTop: 4, fontSize: 12 }}>
             {item.episodes.length} {strings.episodes}

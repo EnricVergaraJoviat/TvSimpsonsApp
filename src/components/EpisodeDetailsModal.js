@@ -1,11 +1,12 @@
 import React from "react";
 import { Modal, View, Text, Pressable, Animated, ScrollView, Image } from "react-native";
 import { resolveAsset } from "../assets/imagesMap";
+import { formatSeasonTitle } from "../i18n";
 
 export default function EpisodeDetailsModal({
   visible,
   episode,
-  seasonTitle,
+  seasonNumber,
   strings,
   onClose,
   onPlay,
@@ -57,7 +58,7 @@ export default function EpisodeDetailsModal({
             }}
           >
             <Text style={{ color: "#111", fontSize: 24, fontWeight: "900" }}>
-              {seasonTitle || strings?.seasonFallback || "Season"}
+              {formatSeasonTitle(seasonNumber, strings)}
             </Text>
             <Pressable
               onPress={onClose}

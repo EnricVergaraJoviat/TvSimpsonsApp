@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, Animated } from "react-native";
 import { resolveAsset } from "../assets/imagesMap";
+import { formatSeasonTitle } from "../i18n";
 
 export default function SeasonHeader({
   season,
@@ -41,7 +42,7 @@ export default function SeasonHeader({
             }}
           >
             <Text style={{ color: "#fff" }}>
-              {season?.title || strings?.seasonFallback || "Season"}
+              {formatSeasonTitle(season?.id, strings)}
             </Text>
           </View>
         )}
@@ -65,7 +66,7 @@ export default function SeasonHeader({
           }}
         >
           <Text style={{ color: "#fff", fontSize: 26, fontWeight: "900" }}>
-            {season?.title}
+            {formatSeasonTitle(season?.id, strings)}
           </Text>
           <Text style={{ color: "rgba(255,255,255,0.9)", marginTop: 2, fontSize: 13 }}>
             {season?.episodes?.length ?? 0} {strings?.episodes || "episodes"}

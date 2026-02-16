@@ -229,7 +229,7 @@ export default function EpisodesScreen({ route, navigation }) {
       <EpisodeDetailsModal
         visible={isDetailsVisible}
         episode={selectedEpisode}
-        seasonTitle={season?.title}
+        seasonNumber={season?.id}
         strings={strings}
         onClose={closeEpisodeDetails}
         onPlay={onPressPlay}
