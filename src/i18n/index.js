@@ -123,16 +123,16 @@ export function getDeviceLanguage() {
     navigatorLocale,
   ].filter(Boolean);
 
-  // Priorizamos ES si aparece en cualquier fuente (evita falsos EN en Expo Go).
-  if (candidates.some((locale) => pickAppLanguageFromLocale(locale) === "es")) {
-    return "es";
-  }
+  // Respetar orden de preferencia del sistema:
+  // primer locale resoluble gana.
+  const seen = new Set();
+  for (const locale of candidates) {
+    const key = String(locale).trim();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
 
-  if (candidates.some((locale) => pickAppLanguageFromLocale(locale) === "en")) {
-    // En Expo Go es común recibir "en" aunque el sistema esté en español.
-    // Si no tenemos locales de expo-localization, preferimos ES para esta app.
-    if (expoLocales.length === 0) return "es";
-    return "en";
+    const mapped = pickAppLanguageFromLocale(key);
+    if (mapped) return mapped;
   }
 
   // Fallback pragmático: esta app está orientada a ES y solo tiene ES/EN.
