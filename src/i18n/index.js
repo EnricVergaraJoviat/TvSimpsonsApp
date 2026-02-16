@@ -129,6 +129,9 @@ export function getDeviceLanguage() {
   }
 
   if (candidates.some((locale) => pickAppLanguageFromLocale(locale) === "en")) {
+    // En Expo Go es común recibir "en" aunque el sistema esté en español.
+    // Si no tenemos locales de expo-localization, preferimos ES para esta app.
+    if (expoLocales.length === 0) return "es";
     return "en";
   }
 
