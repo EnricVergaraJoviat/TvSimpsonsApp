@@ -1,5 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { getRaspberryHealth } from "../services/raspberryApi";
+import {
+  getRaspberryBaseUrl,
+  getRaspberryHealth,
+  setRaspberryBaseUrl,
+} from "../services/raspberryApi";
 
 const RaspberryStatusContext = createContext(null);
 
@@ -14,19 +18,35 @@ const INITIAL_HEALTH = {
 
 export function RaspberryStatusProvider({ children }) {
   const [health, setHealth] = useState(INITIAL_HEALTH);
+  const [baseUrl, setBaseUrl] = useState(null);
 
   const refreshHealth = useCallback(async () => {
     const data = await getRaspberryHealth();
     setHealth(data);
+    setBaseUrl(data?.baseUrl ?? null);
     return data;
   }, []);
+
+  const updateBaseUrl = useCallback(
+    async (nextUrl) => {
+      const normalized = await setRaspberryBaseUrl(nextUrl);
+      setBaseUrl(normalized);
+      await refreshHealth();
+      return normalized;
+    },
+    [refreshHealth]
+  );
 
   useEffect(() => {
     let mounted = true;
 
     const run = async () => {
+      const currentBaseUrl = await getRaspberryBaseUrl();
       const data = await getRaspberryHealth();
-      if (mounted) setHealth(data);
+      if (mounted) {
+        setBaseUrl(currentBaseUrl);
+        setHealth(data);
+      }
     };
 
     run();
@@ -42,8 +62,10 @@ export function RaspberryStatusProvider({ children }) {
     () => ({
       health,
       refreshHealth,
+      baseUrl,
+      updateBaseUrl,
     }),
-    [health, refreshHealth]
+    [health, refreshHealth, baseUrl, updateBaseUrl]
   );
 
   return (

@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View, Text, Pressable, Modal, Animated, Alert } from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { stopRaspberryPlayback } from "../services/raspberryApi";
 import { useRaspberryStatus } from "../context/RaspberryStatusContext";
 
@@ -11,9 +12,13 @@ function statusColor(status) {
 }
 
 export default function RaspberryStatusBadge({ strings, style }) {
-  const { health, refreshHealth } = useRaspberryStatus();
+  const { health, refreshHealth, baseUrl, updateBaseUrl } = useRaspberryStatus();
   const insets = useSafeAreaInsets();
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [visible, setVisible] = useState(false);
+  const [scannerVisible, setScannerVisible] = useState(false);
+  const [scannerLocked, setScannerLocked] = useState(false);
+  const scannerLockRef = useRef(false);
   const [stopping, setStopping] = useState(false);
   const anim = useRef(new Animated.Value(0)).current;
 
@@ -52,6 +57,77 @@ export default function RaspberryStatusBadge({ strings, style }) {
     }
   }, [refreshHealth, strings?.rpiStopErrorTitle]);
 
+  const openScanner = useCallback(async () => {
+    const current = cameraPermission?.granted;
+    if (!current) {
+      const req = await requestCameraPermission();
+      if (!req?.granted) {
+        Alert.alert(
+          strings?.rpiQrPermissionTitle || "Camera permission required",
+          strings?.rpiQrPermissionMessage || "Allow camera access to scan the Raspberry QR."
+        );
+        return;
+      }
+    }
+
+    // iOS falla a veces al presentar un Modal encima de otro.
+    // Cerramos primero el modal de estado y luego abrimos el escáner.
+    Animated.timing(anim, {
+      toValue: 0,
+      duration: 140,
+      useNativeDriver: true,
+    }).start(() => {
+      setVisible(false);
+      setScannerLocked(false);
+      scannerLockRef.current = false;
+      setScannerVisible(true);
+    });
+  }, [
+    anim,
+    cameraPermission?.granted,
+    requestCameraPermission,
+    strings?.rpiQrPermissionMessage,
+    strings?.rpiQrPermissionTitle,
+  ]);
+
+  const closeScanner = useCallback(() => {
+    setScannerVisible(false);
+    setScannerLocked(false);
+    scannerLockRef.current = false;
+  }, []);
+
+  const onScanQr = useCallback(
+    async ({ data }) => {
+      if (scannerLockRef.current) return;
+      scannerLockRef.current = true;
+      setScannerLocked(true);
+
+      try {
+        const normalized = await updateBaseUrl(data);
+        closeScanner();
+        Alert.alert(
+          strings?.rpiQrSavedTitle || "Raspberry updated",
+          `${strings?.rpiBaseUrlLabel || "URL"}: ${normalized}`
+        );
+      } catch (_err) {
+        scannerLockRef.current = false;
+        setScannerLocked(false);
+        Alert.alert(
+          strings?.rpiQrInvalidTitle || "Invalid QR",
+          strings?.rpiQrInvalidMessage || "The QR must contain a valid URL like http://10.1.35.27:5050"
+        );
+      }
+    },
+    [
+      closeScanner,
+      strings?.rpiBaseUrlLabel,
+      strings?.rpiQrInvalidMessage,
+      strings?.rpiQrInvalidTitle,
+      strings?.rpiQrSavedTitle,
+      updateBaseUrl,
+    ]
+  );
+
   const cardTranslateY = anim.interpolate({
     inputRange: [0, 1],
     outputRange: [24, 0],
@@ -63,6 +139,9 @@ export default function RaspberryStatusBadge({ strings, style }) {
   });
 
   const stateLabel =
+    health.error === "not_configured"
+      ? strings?.rpiNotConfigured || "Not configured"
+      :
     health.status === "green"
       ? strings?.rpiConnected || "Connected"
       : health.status === "yellow"
@@ -167,10 +246,13 @@ export default function RaspberryStatusBadge({ strings, style }) {
             <Text style={{ color: "#111", fontSize: 14, marginBottom: 14 }}>
               {strings?.rpiPlayingLabel || "playing"}: {health.playing || "-"}
             </Text>
+            <Text style={{ color: "#111", fontSize: 13, marginBottom: 14 }}>
+              {strings?.rpiBaseUrlLabel || "URL"}: {baseUrl || strings?.rpiUnknown || "unknown"}
+            </Text>
 
             <View style={{ flexDirection: "row", gap: 10 }}>
               <Pressable
-                onPress={refreshHealth}
+                onPress={openScanner}
                 style={({ pressed }) => ({
                   flex: 1,
                   height: 44,
@@ -182,7 +264,7 @@ export default function RaspberryStatusBadge({ strings, style }) {
                 })}
               >
                 <Text style={{ color: "#111", fontWeight: "700" }}>
-                  {strings?.rpiRefresh || "Refresh"}
+                  {strings?.rpiScanQr || "Scan QR"}
                 </Text>
               </Pressable>
 
@@ -212,6 +294,76 @@ export default function RaspberryStatusBadge({ strings, style }) {
               </Pressable>
             </View>
           </Animated.View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={scannerVisible}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={closeScanner}
+      >
+        <View style={{ flex: 1, backgroundColor: "#000" }}>
+          <CameraView
+            style={{ flex: 1 }}
+            facing="back"
+            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+            onBarcodeScanned={scannerLocked ? undefined : onScanQr}
+          />
+
+          <View
+            style={{
+              position: "absolute",
+              top: insets.top + 14,
+              left: 16,
+              right: 16,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "800" }}>
+              {strings?.rpiScanQr || "Scan QR"}
+            </Text>
+            <Pressable
+              onPress={closeScanner}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(255,255,255,0.2)",
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 22, fontWeight: "900" }}>×</Text>
+            </Pressable>
+          </View>
+
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              bottom: insets.bottom + 22,
+              left: 24,
+              right: 24,
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: 14,
+                textAlign: "center",
+                backgroundColor: "rgba(0,0,0,0.45)",
+                paddingVertical: 8,
+                paddingHorizontal: 12,
+                borderRadius: 10,
+              }}
+            >
+              {strings?.rpiQrHint || "Scan a QR containing a Raspberry URL like http://10.1.35.27:5050"}
+            </Text>
+          </View>
         </View>
       </Modal>
     </>

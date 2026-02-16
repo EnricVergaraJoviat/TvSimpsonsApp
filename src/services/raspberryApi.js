@@ -1,11 +1,71 @@
-export const RASPBERRY_API_BASE_URL = "http://10.1.35.27:5050";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const STORAGE_KEY = "raspberry_api_base_url";
+
+let cachedBaseUrl = null;
+let hasLoadedFromStorage = false;
+
+function normalizeBaseUrl(input) {
+  const raw = String(input || "").trim();
+  if (!raw) throw new Error("Empty URL");
+
+  const withProtocol = /^https?:\/\//i.test(raw) ? raw : `http://${raw}`;
+  const parsed = new URL(withProtocol);
+
+  if (!parsed.hostname) throw new Error("Invalid hostname");
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error("Only http/https are supported");
+  }
+
+  return `${parsed.protocol}//${parsed.host}`;
+}
+
+export async function getRaspberryBaseUrl() {
+  if (!hasLoadedFromStorage) {
+    try {
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        cachedBaseUrl = normalizeBaseUrl(stored);
+      } else {
+        cachedBaseUrl = null;
+      }
+    } catch (_err) {
+      cachedBaseUrl = null;
+    } finally {
+      hasLoadedFromStorage = true;
+    }
+  }
+
+  return cachedBaseUrl;
+}
+
+export async function setRaspberryBaseUrl(nextUrl) {
+  const normalized = normalizeBaseUrl(nextUrl);
+  cachedBaseUrl = normalized;
+  hasLoadedFromStorage = true;
+  await AsyncStorage.setItem(STORAGE_KEY, normalized);
+  return normalized;
+}
 
 export async function getRaspberryHealth({ timeoutMs = 3500 } = {}) {
+  const baseUrl = await getRaspberryBaseUrl();
+  if (!baseUrl) {
+    return {
+      status: "red",
+      ok: false,
+      running: false,
+      playing: null,
+      ts: null,
+      error: "not_configured",
+      baseUrl: null,
+    };
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const res = await fetch(`${RASPBERRY_API_BASE_URL}/health`, {
+    const res = await fetch(`${baseUrl}/health`, {
       method: "GET",
       signal: controller.signal,
     });
@@ -22,6 +82,7 @@ export async function getRaspberryHealth({ timeoutMs = 3500 } = {}) {
         playing: null,
         ts: null,
         error: "invalid_json",
+        baseUrl,
       };
     }
 
@@ -33,6 +94,7 @@ export async function getRaspberryHealth({ timeoutMs = 3500 } = {}) {
       playing: json?.playing ?? null,
       ts: json?.ts ?? null,
       error: null,
+      baseUrl,
     };
   } catch (_err) {
     return {
@@ -42,6 +104,7 @@ export async function getRaspberryHealth({ timeoutMs = 3500 } = {}) {
       playing: null,
       ts: null,
       error: "request_failed",
+      baseUrl,
     };
   } finally {
     clearTimeout(timeout);
@@ -54,19 +117,23 @@ export async function getRaspberryHealthStatus({ timeoutMs = 3500 } = {}) {
 }
 
 export async function stopRaspberryPlayback({ timeoutMs = 5000 } = {}) {
+  const baseUrl = await getRaspberryBaseUrl();
+  if (!baseUrl) {
+    throw new Error("Raspberry URL not configured");
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    let res = await fetch(`${RASPBERRY_API_BASE_URL}/stop`, {
+    let res = await fetch(`${baseUrl}/stop`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       signal: controller.signal,
     });
 
-    // Fallback por si el backend usa GET para stop.
     if (!res.ok && (res.status === 404 || res.status === 405)) {
-      res = await fetch(`${RASPBERRY_API_BASE_URL}/stop`, {
+      res = await fetch(`${baseUrl}/stop`, {
         method: "GET",
         signal: controller.signal,
       });

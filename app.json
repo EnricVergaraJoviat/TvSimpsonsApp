@@ -26,7 +26,13 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite acceso a la cámara para escanear el QR de la Raspberry."
+        }
+      ]
     ]
   }
 }

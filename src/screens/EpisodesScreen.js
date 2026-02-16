@@ -22,7 +22,7 @@ import SeasonHeader from "../components/SeasonHeader";
 import EpisodeDetailsModal from "../components/EpisodeDetailsModal";
 import RaspberryStatusBadge from "../components/RaspberryStatusBadge";
 import { getDeviceLanguage, getStrings } from "../i18n";
-import { RASPBERRY_API_BASE_URL } from "../services/raspberryApi";
+import { getRaspberryBaseUrl } from "../services/raspberryApi";
 
 const { height: SCREEN_H } = Dimensions.get("window");
 
@@ -96,11 +96,20 @@ export default function EpisodesScreen({ route, navigation }) {
   }, [detailsAnim]);
 
   const playEpisodeOnPi = useCallback(async (raspberryEpisodeId) => {
+    const baseUrl = await getRaspberryBaseUrl();
+    if (!baseUrl) {
+      Alert.alert(
+        strings.rpiNotConfigured || "Raspberry not configured",
+        strings.rpiNeedQrFirst || "Scan the Raspberry QR first from the RPi status badge."
+      );
+      return;
+    }
+
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
 
     try {
-      const res = await fetch(`${RASPBERRY_API_BASE_URL}/play`, {
+      const res = await fetch(`${baseUrl}/play`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: raspberryEpisodeId }),
@@ -118,12 +127,12 @@ export default function EpisodesScreen({ route, navigation }) {
     } catch (err) {
       Alert.alert(
         strings.couldNotPlay,
-        `Error llamando a ${RASPBERRY_API_BASE_URL}/play\n\n${String(err)}`
+        `Error llamando a ${baseUrl}/play\n\n${String(err)}`
       );
     } finally {
       clearTimeout(timeout);
     }
-  }, [strings.couldNotPlay]);
+  }, [strings.couldNotPlay, strings.rpiNeedQrFirst, strings.rpiNotConfigured]);
 
   const onPressPlay = useCallback(
     async (item) => {
