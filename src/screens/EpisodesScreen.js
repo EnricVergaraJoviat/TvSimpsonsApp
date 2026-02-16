@@ -20,6 +20,7 @@ import { localizeSimpsonsData } from "../data/localizeSimpsonsData";
 import EpisodeRow from "../components/EpisodeRow";
 import SeasonHeader from "../components/SeasonHeader";
 import EpisodeDetailsModal from "../components/EpisodeDetailsModal";
+import RaspberryStatusBadge from "../components/RaspberryStatusBadge";
 import { getDeviceLanguage, getStrings } from "../i18n";
 import { RASPBERRY_API_BASE_URL } from "../services/raspberryApi";
 
@@ -178,6 +179,7 @@ export default function EpisodesScreen({ route, navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: bgColor }}>
       <StatusBar barStyle="light-content" />
+      <RaspberryStatusBadge strings={strings} />
 
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.22)" }}>
         {/* LISTA */}
