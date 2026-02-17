@@ -35,6 +35,11 @@ const STRINGS = {
     rpiUnknown: "unknown",
     rpiNotConfigured: "No configurada",
     rpiNeedQrFirst: "Primero escanea el QR de la Raspberry desde el badge RPi.",
+    rpiPlayingTitle: "Reproduciendo",
+    episodePrefix: "Capítulo",
+    minutes: "minutos",
+    synopsisLabel: "Sinopsis",
+    playSimpsonsTv: "Reproducir en Simpsons TV",
   },
   en: {
     episodes: "episodes",
@@ -70,6 +75,11 @@ const STRINGS = {
     rpiUnknown: "unknown",
     rpiNotConfigured: "Not configured",
     rpiNeedQrFirst: "Scan the Raspberry QR first from the RPi badge.",
+    rpiPlayingTitle: "Playing",
+    episodePrefix: "Episode",
+    minutes: "minutes",
+    synopsisLabel: "Synopsis",
+    playSimpsonsTv: "Play on Simpsons TV",
   },
 };
 

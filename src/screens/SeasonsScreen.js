@@ -139,7 +139,7 @@ export default function SeasonsScreen({ navigation }) {
             height: headerHeight,
             alignItems: "flex-start",
             justifyContent: "center",
-            paddingTop: insets.top +0,
+            paddingTop: insets.top,
             paddingLeft: 12,
             paddingRight: 112,
           }}

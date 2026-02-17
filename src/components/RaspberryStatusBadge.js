@@ -150,14 +150,11 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
   const badgeScale = scale;
 
   const stateLabel =
-    health.error === "not_configured"
-      ? strings?.rpiNotConfigured || "Not configured"
-      :
     health.status === "green"
       ? strings?.rpiConnected || "Connected"
       : health.status === "yellow"
       ? strings?.rpiDegraded || "Degraded"
-      : strings?.rpiDisconnected || "Disconnected";
+      : strings?.rpiDisconnected || "Sin conexión";
 
   return (
     <>
@@ -233,9 +230,16 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
                 marginBottom: 10,
               }}
             >
-              <Text style={{ color: "#111", fontSize: 20, fontWeight: "900" }}>
-                Raspberry Pi
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Image
+                  source={require("../../assets/tele_green_1.png")}
+                  style={{ width: 26, height: 26, marginRight: 8 }}
+                  resizeMode="contain"
+                />
+                <Text style={{ color: "#111", fontSize: 20, fontWeight: "900" }}>
+                  Simpsons TV
+                </Text>
+              </View>
               <Pressable onPress={closeModal}>
                 <Text style={{ color: "#111", fontSize: 22, fontWeight: "800" }}>×</Text>
               </Pressable>
@@ -256,17 +260,17 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
               </Text>
             </View>
 
-            <Text style={{ color: "#111", fontSize: 14, marginBottom: 6 }}>
-              {strings?.rpiOkLabel || "ok"}: {health.ok ? "true" : "false"}
-            </Text>
-            <Text style={{ color: "#111", fontSize: 14, marginBottom: 6 }}>
-              {strings?.rpiRunningLabel || "running"}: {health.running ? "true" : "false"}
-            </Text>
             <Text style={{ color: "#111", fontSize: 14, marginBottom: 14 }}>
-              {strings?.rpiPlayingLabel || "playing"}: {health.playing || "-"}
+              <Text style={{ fontWeight: "800" }}>
+                {strings?.rpiPlayingTitle || "Reproduciendo"}:
+              </Text>{" "}
+              {health.playing || "-"}
             </Text>
             <Text style={{ color: "#111", fontSize: 13, marginBottom: 14 }}>
-              {strings?.rpiBaseUrlLabel || "URL"}: {baseUrl || strings?.rpiUnknown || "unknown"}
+              <Text style={{ fontWeight: "800" }}>
+                {strings?.rpiBaseUrlLabel || "IP/URL"}:
+              </Text>{" "}
+              {baseUrl || strings?.rpiUnknown || "unknown"}
             </Text>
 
             <View style={{ flexDirection: "row", gap: 10 }}>
@@ -276,14 +280,66 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
                   flex: 1,
                   height: 44,
                   borderRadius: 12,
+                  flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: "rgba(0,0,0,0.08)",
                   opacity: pressed ? 0.8 : 1,
                 })}
               >
+                <View
+                  style={{
+                    width: 18,
+                    height: 18,
+                    borderWidth: 2,
+                    borderColor: "#111",
+                    marginRight: 8,
+                    position: "relative",
+                  }}
+                >
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: 1,
+                      left: 1,
+                      width: 4,
+                      height: 4,
+                      backgroundColor: "#111",
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: 1,
+                      right: 1,
+                      width: 4,
+                      height: 4,
+                      backgroundColor: "#111",
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      bottom: 1,
+                      left: 1,
+                      width: 4,
+                      height: 4,
+                      backgroundColor: "#111",
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      bottom: 5,
+                      right: 5,
+                      width: 3,
+                      height: 3,
+                      backgroundColor: "#111",
+                    }}
+                  />
+                </View>
                 <Text style={{ color: "#111", fontWeight: "700" }}>
-                  {strings?.rpiScanQr || "Scan QR"}
+                  {strings?.rpiScanQr || "Escanear QR"}
                 </Text>
               </Pressable>
 
@@ -306,9 +362,10 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
                 })}
               >
                 <Text style={{ color: "#fff", fontWeight: "800" }}>
+                  {"⏹ "}
                   {stopping
                     ? strings?.rpiStopping || "Stopping..."
-                    : strings?.rpiStop || "Stop"}
+                    : strings?.rpiStop || "Detener"}
                 </Text>
               </Pressable>
             </View>

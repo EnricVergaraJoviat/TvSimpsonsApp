@@ -48,18 +48,7 @@ export default function EpisodeDetailsModal({
             transform: [{ translateY: cardTranslateY }, { scale: cardScale }],
           }}
         >
-          <View
-            style={{
-              paddingVertical: 12,
-              paddingHorizontal: 14,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "#111", fontSize: 24, fontWeight: "900" }}>
-              {formatSeasonTitle(seasonNumber, strings)}
-            </Text>
+          <View style={{ position: "absolute", top: 12, right: 14, zIndex: 10 }}>
             <Pressable
               onPress={onClose}
               style={({ pressed }) => ({
@@ -68,7 +57,9 @@ export default function EpisodeDetailsModal({
                 borderRadius: 18,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "rgba(0,0,0,0.08)",
+                backgroundColor: "rgba(255,255,255,0.95)",
+                borderWidth: 1,
+                borderColor: "rgba(0,0,0,0.12)",
                 opacity: pressed ? 0.7 : 1,
               })}
             >
@@ -79,42 +70,76 @@ export default function EpisodeDetailsModal({
           <ScrollView
             style={{ flex: 1 }}
             contentContainerStyle={{
-              paddingHorizontal: 16,
+              paddingHorizontal: 14,
+              paddingTop: 12,
               paddingBottom: 18,
             }}
             showsVerticalScrollIndicator={false}
           >
             {episode && (
               <>
-                {episodeImg ? (
-                  <Image
-                    source={episodeImg}
+                <View
+                  style={{
+                    marginHorizontal: -14,
+                    marginTop: -12,
+                    padding: 12,
+                    backgroundColor: "#000",
+                    marginBottom: 14,
+                  }}
+                >
+                  <Text
                     style={{
-                      width: "100%",
-                      height: 190,
-                      borderRadius: 12,
-                      marginBottom: 14,
+                      color: "#fff",
+                      fontSize: 24,
+                      fontWeight: "900",
+                      marginBottom: 10,
                     }}
-                    resizeMode="cover"
-                  />
-                ) : null}
+                  >
+                    {formatSeasonTitle(seasonNumber, strings)}
+                  </Text>
+
+                  {episodeImg ? (
+                    <Image
+                      source={episodeImg}
+                      style={{
+                        width: "100%",
+                        height: 190,
+                        borderRadius: 0,
+                      }}
+                      resizeMode="cover"
+                    />
+                  ) : null}
+                </View>
 
                 <Text
                   style={{
                     color: "#121212",
-                    fontSize: 24,
+                    fontSize: 19,
                     fontWeight: "900",
-                    lineHeight: 28,
+                    lineHeight: 24,
                   }}
                 >
-                  {episode.episodeNumber}. {episode.title}
+                  {(strings?.episodePrefix || "Episode")} {episode.episodeNumber}:
+                </Text>
+                <Text
+                  style={{
+                    color: "#121212",
+                    fontSize: 19,
+                    fontWeight: "900",
+                    lineHeight: 24,
+                    marginTop: 2,
+                  }}
+                >
+                  {episode.title}
                 </Text>
 
-                <Text style={{ color: "#222", fontSize: 15, marginTop: 10 }}>
-                  {strings?.duration || "Duration"}: {episode.duration}
+                <Text style={{ color: "#222", fontSize: 15, marginTop: 12 }}>
+                  ⏱ <Text style={{ fontWeight: "800" }}>{strings?.duration || "Duration"}:</Text>{" "}
+                  {episode.duration} {strings?.minutes || "minutes"}
                 </Text>
-                <Text style={{ color: "#222", fontSize: 15, marginTop: 2 }}>
-                  {strings?.airDate || "Aired"}: {episode.airDate}
+                <Text style={{ color: "#222", fontSize: 15, marginTop: 12 }}>
+                  📅 <Text style={{ fontWeight: "800" }}>{strings?.airDate || "Aired"}:</Text>{" "}
+                  {episode.airDate}
                 </Text>
 
                 <Text
@@ -125,6 +150,7 @@ export default function EpisodeDetailsModal({
                     lineHeight: 23,
                   }}
                 >
+                  📝 <Text style={{ fontWeight: "800" }}>{strings?.synopsisLabel || "Synopsis"}:</Text>{" "}
                   {episode.synopsis || strings?.noSynopsis || "Synopsis not available."}
                 </Text>
               </>
@@ -138,14 +164,20 @@ export default function EpisodeDetailsModal({
               style={({ pressed }) => ({
                 height: 52,
                 borderRadius: 12,
+                flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: "#111",
                 opacity: pressed ? 0.86 : 1,
               })}
             >
+              <Image
+                source={require("../../assets/tele_green_1.png")}
+                style={{ width: 40, height: 40, marginRight: 8 }}
+                resizeMode="contain"
+              />
               <Text style={{ color: "#fff", fontSize: 17, fontWeight: "800" }}>
-                {strings?.playOnRaspberry || "▶ Play on Raspberry"}
+                {strings?.playSimpsonsTv || "Reproducir Simpsons TV"}
               </Text>
             </Pressable>
           </View>
