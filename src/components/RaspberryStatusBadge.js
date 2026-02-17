@@ -1,6 +1,6 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { View, Text, Pressable, Modal, Animated, Alert } from "react-native";
+import { View, Text, Pressable, Modal, Animated, Alert, Image } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { stopRaspberryPlayback } from "../services/raspberryApi";
 import { useRaspberryStatus } from "../context/RaspberryStatusContext";
@@ -11,7 +11,7 @@ function statusColor(status) {
   return "#ef4444";
 }
 
-export default function RaspberryStatusBadge({ strings, style }) {
+export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0 }) {
   const { health, refreshHealth, baseUrl, updateBaseUrl } = useRaspberryStatus();
   const insets = useSafeAreaInsets();
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -20,7 +20,17 @@ export default function RaspberryStatusBadge({ strings, style }) {
   const [scannerLocked, setScannerLocked] = useState(false);
   const scannerLockRef = useRef(false);
   const [stopping, setStopping] = useState(false);
+  const [tvFrame, setTvFrame] = useState(0);
   const anim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Parpadeo de tele cada segundo para estados con 2 frames.
+    const intervalId = setInterval(() => {
+      setTvFrame((prev) => (prev === 0 ? 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const openModal = useCallback(() => {
     setVisible(true);
@@ -137,6 +147,7 @@ export default function RaspberryStatusBadge({ strings, style }) {
     inputRange: [0, 1],
     outputRange: [0, 1],
   });
+  const badgeScale = scale;
 
   const stateLabel =
     health.error === "not_configured"
@@ -150,37 +161,45 @@ export default function RaspberryStatusBadge({ strings, style }) {
 
   return (
     <>
-      <Pressable
-        onPress={openModal}
-        style={[
-          {
-            position: "absolute",
-            top: insets.top + 0,
-            right: 16,
-            zIndex: 30,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
-            paddingVertical: 6,
-            paddingHorizontal: 10,
-            borderRadius: 999,
-            backgroundColor: "rgba(0,0,0,0.45)",
-          },
-          style,
-        ]}
+      <Animated.View
+        style={{
+          position: "absolute",
+          top: insets.top + topOffset,
+          right: 16,
+          zIndex: 30,
+          transform: [{ scale: badgeScale }],
+        }}
       >
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 5,
-            backgroundColor: statusColor(health.status),
-          }}
-        />
-        <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
-          RPi
-        </Text>
-      </Pressable>
+        <Pressable
+          onPress={openModal}
+          style={({ pressed }) => ({
+            width: 104,
+            height: 104,
+            borderRadius: 52,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(255,255,255,0.28)",
+            borderWidth: 1,
+            borderColor: "rgba(255,255,255,0.55)",
+            overflow: "hidden",
+            opacity: pressed ? 0.88 : 1,
+          })}
+        >
+          <Image
+            source={
+              health.status === "green"
+                ? tvFrame === 0
+                  ? require("../../assets/tele_green_1.png")
+                  : require("../../assets/tele_green_2.png")
+                : tvFrame === 0
+                ? require("../../assets/tele_red_1.png")
+                : require("../../assets/tele_red_2.png")
+            }
+            style={{ width: 76, height: 76, marginTop: 0 }}
+            resizeMode="contain"
+          />
+        </Pressable>
+      </Animated.View>
 
       <Modal visible={visible} transparent animationType="none" onRequestClose={closeModal}>
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>

@@ -24,8 +24,8 @@ const GAP = 14;
 const H_PADDING = 16;
 
 // Header “10% -> 5%” (aprox)
-const MAX_HEADER_H = SCREEN_H * 0.2;
-const MIN_HEADER_H = SCREEN_H * 0.1;
+const MAX_HEADER_H = SCREEN_H * 0.24;
+const MIN_HEADER_H = SCREEN_H * 0.12;
 
 // Cuánto scroll hace falta para completar la animación
 const COLLAPSE_DISTANCE = 180;
@@ -49,12 +49,6 @@ export default function SeasonsScreen({ navigation }) {
   const headerHeight = scrollY.interpolate({
     inputRange: [0, COLLAPSE_DISTANCE],
     outputRange: [MAX_HEADER_H, MIN_HEADER_H],
-    extrapolate: "clamp",
-  });
-
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, COLLAPSE_DISTANCE * 0.8, COLLAPSE_DISTANCE],
-    outputRange: [1, 0.75, 0.4],
     extrapolate: "clamp",
   });
 
@@ -137,23 +131,24 @@ export default function SeasonsScreen({ navigation }) {
 
       {/* Overlay para contraste */}
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)" }}>
-        <RaspberryStatusBadge strings={strings} />
+        <RaspberryStatusBadge strings={strings} topOffset={14} />
 
         {/* Header animado */}
         <Animated.View
           style={{
             height: headerHeight,
-            opacity: headerOpacity,
-            alignItems: "center",
+            alignItems: "flex-start",
             justifyContent: "center",
-            paddingTop: insets.top + 6,
+            paddingTop: insets.top +0,
+            paddingLeft: 12,
+            paddingRight: 112,
           }}
         >
           <Animated.Image
             source={require("../../assets/logos/logo_simpsons.png")}
             resizeMode="contain"
             style={{
-              width: "82%",
+              width: "100%",
               height: "80%",
               transform: [{ scale: logoScale }],
             }}
