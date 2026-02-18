@@ -224,7 +224,7 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
                 ? require("../../assets/tele_red_1.png")
                 : require("../../assets/tele_red_2.png")
             }
-            style={{ width: 76, height: 76, marginTop: 0 }}
+            style={{ width: 84, height: 84, marginTop: 0 }}
             resizeMode="contain"
           />
         </Pressable>
