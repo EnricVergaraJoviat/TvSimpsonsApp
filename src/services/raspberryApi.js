@@ -155,3 +155,44 @@ export async function stopRaspberryPlayback({ timeoutMs = 5000 } = {}) {
     clearTimeout(timeout);
   }
 }
+
+async function postToRaspberry(path, { timeoutMs = 5000 } = {}) {
+  const baseUrl = await getRaspberryBaseUrl();
+  if (!baseUrl) {
+    throw new Error("Raspberry URL not configured");
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(`${baseUrl}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      throw new Error(`HTTP ${res.status} ${txt}`);
+    }
+
+    const txt = await res.text().catch(() => "");
+    if (!txt) return { ok: true };
+    try {
+      return JSON.parse(txt);
+    } catch (_err) {
+      return { ok: true, raw: txt };
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function volumeDownRaspberry({ timeoutMs = 5000 } = {}) {
+  return postToRaspberry("/volume/down", { timeoutMs });
+}
+
+export async function volumeUpRaspberry({ timeoutMs = 5000 } = {}) {
+  return postToRaspberry("/volume/up", { timeoutMs });
+}

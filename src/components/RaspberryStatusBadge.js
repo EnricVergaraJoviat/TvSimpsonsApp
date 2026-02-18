@@ -2,7 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View, Text, Pressable, Modal, Animated, Alert, Image } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { stopRaspberryPlayback } from "../services/raspberryApi";
+import {
+  stopRaspberryPlayback,
+  volumeDownRaspberry,
+  volumeUpRaspberry,
+} from "../services/raspberryApi";
 import { useRaspberryStatus } from "../context/RaspberryStatusContext";
 
 function statusColor(status) {
@@ -20,6 +24,7 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
   const [scannerLocked, setScannerLocked] = useState(false);
   const scannerLockRef = useRef(false);
   const [stopping, setStopping] = useState(false);
+  const [changingVolume, setChangingVolume] = useState(false);
   const [tvFrame, setTvFrame] = useState(0);
   const anim = useRef(new Animated.Value(0)).current;
 
@@ -66,6 +71,32 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
       setStopping(false);
     }
   }, [refreshHealth, strings?.rpiStopErrorTitle]);
+
+  const canControlPlayback = health.status === "green" && health.running;
+
+  const onVolumeDown = useCallback(async () => {
+    setChangingVolume(true);
+    try {
+      await volumeDownRaspberry();
+      await refreshHealth();
+    } catch (err) {
+      Alert.alert(strings?.rpiVolumeErrorTitle || "Volume error", String(err));
+    } finally {
+      setChangingVolume(false);
+    }
+  }, [refreshHealth, strings?.rpiVolumeErrorTitle]);
+
+  const onVolumeUp = useCallback(async () => {
+    setChangingVolume(true);
+    try {
+      await volumeUpRaspberry();
+      await refreshHealth();
+    } catch (err) {
+      Alert.alert(strings?.rpiVolumeErrorTitle || "Volume error", String(err));
+    } finally {
+      setChangingVolume(false);
+    }
+  }, [refreshHealth, strings?.rpiVolumeErrorTitle]);
 
   const openScanner = useCallback(async () => {
     const current = cameraPermission?.granted;
@@ -175,9 +206,10 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
             borderRadius: 52,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(255,255,255,0.28)",
-            borderWidth: 1,
-            borderColor: "rgba(255,255,255,0.55)",
+            backgroundColor: "rgba(255,255,255,0.50)",
+            borderWidth: 2,
+            borderColor:
+              health.status === "green" ? "#22c55e" : "#ef4444",
             overflow: "hidden",
             opacity: pressed ? 0.88 : 1,
           })}
@@ -344,7 +376,7 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
               </Pressable>
 
               <Pressable
-                disabled={stopping || (!health.running && !health.playing)}
+                disabled={stopping || !canControlPlayback}
                 onPress={onStop}
                 style={({ pressed }) => ({
                   flex: 1,
@@ -354,7 +386,7 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
                   justifyContent: "center",
                   backgroundColor: "#111",
                   opacity:
-                    stopping || (!health.running && !health.playing)
+                    stopping || !canControlPlayback
                       ? 0.45
                       : pressed
                       ? 0.85
@@ -366,6 +398,54 @@ export default function RaspberryStatusBadge({ strings, scale = 1, topOffset = 0
                   {stopping
                     ? strings?.rpiStopping || "Stopping..."
                     : strings?.rpiStop || "Detener"}
+                </Text>
+              </Pressable>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+              <Pressable
+                disabled={changingVolume || !canControlPlayback}
+                onPress={onVolumeDown}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  height: 40,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0,0,0,0.08)",
+                  opacity:
+                    changingVolume || !canControlPlayback
+                      ? 0.45
+                      : pressed
+                      ? 0.8
+                      : 1,
+                })}
+              >
+                <Text style={{ color: "#111", fontWeight: "800" }}>
+                  {strings?.volumeDown || "🔉 Vol -"}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                disabled={changingVolume || !canControlPlayback}
+                onPress={onVolumeUp}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  height: 40,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0,0,0,0.08)",
+                  opacity:
+                    changingVolume || !canControlPlayback
+                      ? 0.45
+                      : pressed
+                      ? 0.8
+                      : 1,
+                })}
+              >
+                <Text style={{ color: "#111", fontWeight: "800" }}>
+                  {strings?.volumeUp || "🔊 Vol +"}
                 </Text>
               </Pressable>
             </View>

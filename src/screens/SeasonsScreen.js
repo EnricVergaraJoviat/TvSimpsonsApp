@@ -54,7 +54,7 @@ export default function SeasonsScreen({ navigation }) {
 
   const logoScale = scrollY.interpolate({
     inputRange: [0, COLLAPSE_DISTANCE],
-    outputRange: [1, 0.85],
+    outputRange: [1, 0.93],
     extrapolate: "clamp",
   });
 
